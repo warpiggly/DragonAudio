@@ -1,0 +1,7 @@
+{
+  "extName": { "message": "Dragon Audio" },
+  "extDescription": { "message": "Volume up to 600 %, equalizer, pitch, pan and reverb for any tab — even Spotify, YouTube and Netflix." },
+  "actionTitle": { "message": "Dragon Audio" },
+  "cmdOpen": { "message": "Open Dragon Audio" },
+  "cmdToggle": { "message": "Turn Dragon Audio on / off for the current tab" }
+}

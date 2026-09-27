@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <title>Dragon Audio</title>
+  <script src="boot.js"></script>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <radialGradient id="knobBody" cx="50%" cy="36%" r="68%">
+        <stop offset="0%" style="stop-color: var(--knob-a)"/>
+        <stop offset="100%" style="stop-color: var(--knob-b)"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <main class="app" id="app" data-capture="idle">
+    <header class="brand">
+      <img class="brand__logo" src="../../assets/img/logo.png" alt="">
+      <div class="brand__text">
+        <h1 class="brand__title">Dragon Audio</h1>
+        <span class="brand__sub">龙 之 音</span>
+      </div>
+      <button class="power" id="powerBtn" type="button" aria-pressed="false" data-i18n-title="power.turnOn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>
+      </button>
+    </header>
+
+    <div class="tabline">
+      <span class="led" aria-hidden="true"></span>
+      <span class="tabline__host" id="tabHost">—</span>
+      <span class="tabline__state" id="tabState" data-i18n="capture.idle"></span>
+    </div>
+
+    <section class="card hero" data-rack data-i18n-aria="volume.aria">
+      <span class="hero__watermark" aria-hidden="true">龙</span>
+      <button class="chip chip--mute" id="muteBtn" type="button" aria-pressed="false" data-i18n="volume.mute"></button>
+      <div class="hero__knob" id="volumeKnob"></div>
+      <button class="chip" id="unityBtn" type="button" data-i18n-title="volume.unity">100</button>
+      <div class="hero__meter" id="meter"></div>
+    </section>
+
+    <section class="card" data-rack aria-labelledby="eqTitle">
+      <header class="card__head">
+        <h2 id="eqTitle" data-i18n="eq.title"></h2>
+        <button class="icon-btn" id="eqReset" type="button" data-i18n-title="eq.reset">↺</button>
+      </header>
+      <div class="eq" id="eq"></div>
+    </section>
+
+    <section class="card" data-rack aria-labelledby="fxTitle">
+      <header class="card__head">
+        <h2 id="fxTitle" data-i18n="fx.title"></h2>
+        <button class="chip chip--led" id="bypassBtn" type="button" aria-pressed="true" data-i18n-title="fx.bypass">
+          <span class="led" aria-hidden="true"></span>FX
+        </button>
+      </header>
+      <div class="fx" id="fx"></div>
+    </section>
+
+    <footer class="foot">
+      <label class="switch" data-i18n-title="foot.autoHint">
+        <input type="checkbox" id="autoCapture">
+        <span class="switch__track" aria-hidden="true"></span>
+        <span data-i18n="foot.auto"></span>
+      </label>
+
+      <div class="foot__prefs">
+        <div class="seg" role="radiogroup" id="langSeg" data-i18n-aria="foot.lang">
+          <button type="button" role="radio" data-lang="en">EN</button>
+          <button type="button" role="radio" data-lang="es">ES</button>
+        </div>
+        <button class="theme-btn" id="themeBtn" type="button">
+          <svg class="theme-btn__sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/>
+          </svg>
+          <svg class="theme-btn__moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>
+          </svg>
+        </button>
+      </div>
+
+      <button class="text-btn" id="resetBtn" type="button" data-i18n="foot.reset"></button>
+    </footer>
+
+    <div class="notice" id="notice" role="status" hidden></div>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

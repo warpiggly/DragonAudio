@@ -1,0 +1,7 @@
+{
+  "extName": { "message": "Dragon Audio" },
+  "extDescription": { "message": "Volumen hasta 600 %, ecualizador, tono, paneo y reverb para cualquier pestaña — incluso Spotify, YouTube y Netflix." },
+  "actionTitle": { "message": "Dragon Audio" },
+  "cmdOpen": { "message": "Abrir Dragon Audio" },
+  "cmdToggle": { "message": "Activar / desactivar Dragon Audio en la pestaña actual" }
+}

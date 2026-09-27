@@ -1,30 +1,48 @@
 {
   "manifest_version": 3,
-  "name": "Control de Volumen y Paneo",
-  "version": "1.0",
-  "description": "Controla el volumen y paneo de audio de páginas web específicas",
+  "name": "__MSG_extName__",
+  "short_name": "Dragon Audio",
+  "version": "2.0.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
+  "minimum_chrome_version": "116",
   "permissions": [
     "activeTab",
-    "scripting",
-    "storage",
     "tabCapture",
-    "offscreen"
+    "offscreen",
+    "storage"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
   },
   "action": {
-    "default_popup": "popup.html",
-    "default_title": "Control de Audio"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
+    "default_popup": "src/popup/popup.html",
+    "default_title": "__MSG_actionTitle__",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png",
+      "48": "assets/icons/icon-48.png"
     }
-  ],
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+A"
+      },
+      "description": "__MSG_cmdOpen__"
+    },
+    "toggle-capture": {
+      "suggested_key": {
+        "default": "Alt+Shift+D"
+      },
+      "description": "__MSG_cmdToggle__"
+    }
+  },
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png"
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
   }
 }
