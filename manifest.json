@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Control de Volumen y Paneo",
+  "version": "1.0",
+  "description": "Controla el volumen y paneo de audio de páginas web específicas",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabCapture",
+    "offscreen"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Control de Audio"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png"
+  }
+}
