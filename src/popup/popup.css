@@ -101,6 +101,7 @@ html, body { margin: 0; }
 html { background: var(--bg); }
 
 body {
+  position: relative;
   width: 340px;
   background:
     radial-gradient(120% 60% at 50% -10%, var(--glow-top), transparent 60%),
@@ -109,6 +110,52 @@ body {
   color: var(--text);
   font: 12px/1.3 var(--serif);
   user-select: none;
+  overflow: hidden;
+}
+
+/* ── Fondo general: dragón sobre montañas, difuminado ────── */
+.scenery {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.scenery__img {
+  position: absolute;
+  inset: -20px;
+  background: url('../../assets/img/Drag%C3%B3n%20dorado%20sobre%20monta%C3%B1as%20brumosas.png') center / cover no-repeat;
+  filter: blur(3px) saturate(1.1) brightness(0.9);
+  opacity: 0.9;
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+
+:root[data-theme='light'] .scenery__img {
+  filter: blur(4px) saturate(1.15) brightness(1.1) contrast(0.95);
+  opacity: 0.75;
+}
+
+/* El velo baja contraste del contenido sobre la imagen sin tapar el dragón.
+   En oscuro usa un degradado muy suave; en claro una capa crema translúcida. */
+.scenery__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 60% at 50% -10%, var(--glow-top), transparent 60%),
+    radial-gradient(90% 50% at 50% 110%, var(--glow-bottom), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 15%, transparent) 0%, color-mix(in srgb, var(--bg) 35%, transparent) 100%);
+}
+
+/* Capa de partículas mágicas. Va sobre la imagen y el velo pero debajo de
+   la app: aparece en los huecos entre tarjetas y por los bordes, dando la
+   sensación de que las chispas flotan en el aire. */
+.scenery__magic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -116,22 +163,110 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .app {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 7px;
-  padding: 10px 12px;
+  padding: 4px 12px 10px;
+}
+
+/* ── Navegación: 3 estrellas ───────────────────────────── */
+/* La estrella se pinta como background-image: así se puede cambiar la crema
+   por la negra entre temas sin tocar el HTML. drop-shadow sigue la silueta
+   del PNG (que box-shadow no haría). */
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  padding: 10px 0 4px;
+}
+
+.star {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: url('../../assets/img/Estrellas-cambiopagina1.png') center / contain no-repeat;
+  cursor: pointer;
+  opacity: 0.5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), filter 0.3s ease;
+}
+
+:root[data-theme='light'] .star {
+  background-image: url('../../assets/img/Estrellas-cambiopagina.png');
+  filter: drop-shadow(0 1px 2px rgba(43, 33, 24, 0.32));
+}
+
+.star:hover {
+  opacity: 0.9;
+  transform: scale(1.12) rotate(-6deg);
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.55));
+}
+
+:root[data-theme='light'] .star:hover {
+  filter: drop-shadow(0 2px 5px rgba(43, 33, 24, 0.42));
+}
+
+.star:active { transform: scale(1.02) rotate(-2deg); }
+
+.star.is-active {
+  opacity: 1;
+  transform: scale(1.25);
+  filter:
+    drop-shadow(0 0 6px color-mix(in srgb, var(--accent-hi) 85%, transparent))
+    drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+}
+
+:root[data-theme='light'] .star.is-active {
+  filter:
+    drop-shadow(0 0 5px rgba(242, 178, 51, 0.9))
+    drop-shadow(0 2px 4px rgba(43, 33, 24, 0.38));
+}
+
+.star.is-active:hover { transform: scale(1.3) rotate(-6deg); }
+
+.star:focus-visible {
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+@keyframes star-flash {
+  0%   { transform: scale(0.78) rotate(-18deg); }
+  55%  { transform: scale(1.12) rotate(6deg); }
+  100% { transform: scale(1.25) rotate(0deg); }
+}
+
+.star.is-active { animation: star-flash 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .star { transition: none; animation: none; }
 }
 
 /* ── Marca ─────────────────────────────────────────────── */
 .brand { display: flex; align-items: center; gap: 10px; }
 
 .brand__logo {
-  width: 34px;
-  height: 34px;
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 55%, transparent));
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
 }
 
-:root[data-theme='light'] .brand__logo { filter: drop-shadow(0 1px 1px rgba(60, 30, 10, 0.45)) saturate(1.2) brightness(0.8); }
+/* La variante dorada glow dorado sobre fondo oscuro; la negra, sombra
+   suave para despegarse del papel claro. CSS decide cuál se muestra. */
+.brand__logo--dark {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 60%, transparent));
+}
+
+.brand__logo--light {
+  display: none;
+  filter: drop-shadow(0 1px 2px rgba(60, 30, 10, 0.3));
+}
+
+:root[data-theme='light'] .brand__logo--dark { display: none; }
+:root[data-theme='light'] .brand__logo--light { display: block; }
 
 .brand__text { flex: 1; display: flex; flex-direction: column; }
 
@@ -143,6 +278,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
   text-transform: uppercase;
   color: var(--accent);
   text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* En tema claro el nombre acompaña al logo negro: queda en negro también y
+   sin halo dorado para que empate con el logo corporate. */
+:root[data-theme='light'] .brand__title {
+  color: #0a0a0a;
+  text-shadow: none;
 }
 
 .brand__sub {
@@ -697,4 +839,165 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border-color: var(--line);
   background: var(--surface);
   color: var(--muted);
+}
+
+/* ── Vistas: solo una visible a la vez ──────────────────── */
+.view { display: flex; flex-direction: column; gap: 7px; }
+.view[hidden] { display: none; }
+
+/* ── Vista 2 · Presets ─────────────────────────────────── */
+.card__hint {
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.preset {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 10px 9px;
+  border: 1px solid var(--card-edge);
+  border-radius: 7px;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--card-a) 85%, transparent), color-mix(in srgb, var(--card-b) 92%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.06), 0 2px 6px var(--shadow);
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.preset:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.1), 0 4px 10px var(--shadow);
+}
+
+.preset:active { transform: translateY(0); }
+
+.preset[aria-pressed='true'] {
+  border-color: var(--accent-hi);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 170, 0.12),
+    0 0 0 1px color-mix(in srgb, var(--accent-hi) 50%, transparent),
+    0 4px 10px var(--shadow);
+}
+
+.preset__glyph {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--accent-hi);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--accent-hi) 45%, transparent);
+}
+
+.preset__name {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.preset__desc {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  color: var(--muted);
+}
+
+/* ── Vista 3 · Acerca de ───────────────────────────────── */
+.card--about {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  text-align: center;
+}
+
+.about__logo {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+}
+
+.about__logo--dark {
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 65%, transparent));
+}
+
+.about__logo--light {
+  display: none;
+  filter: drop-shadow(0 2px 3px rgba(60, 30, 10, 0.35));
+}
+
+:root[data-theme='light'] .about__logo--dark { display: none; }
+:root[data-theme='light'] .about__logo--light { display: block; }
+
+.about__title {
+  margin: 2px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+:root[data-theme='light'] .about__title {
+  color: #0a0a0a;
+  text-shadow: none;
+}
+
+.about__sub {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 6px;
+  color: var(--crimson);
+}
+
+.about__desc {
+  margin: 6px 4px 0;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.about__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px 10px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.about__meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 9.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.about__meta-key { color: var(--faint); }
+.about__meta-val { color: var(--accent-soft); font-weight: 700; }
+.about__meta-val--mono { font-family: var(--mono); letter-spacing: 1px; text-transform: none; }
+
+.about__credit {
+  margin: 2px 0 0;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--faint);
 }

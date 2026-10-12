@@ -2,6 +2,7 @@ import { DEFAULT_SETTINGS, EQ_BANDS, METER_PORT, MSG, RANGE, TARGET } from '../s
 import { loadSettings, saveSettings } from '../shared/settings.js';
 import { travelToVolume, volumeToTravel, volumeZone } from '../shared/volume.js';
 import { setLang, t, translateDom } from './i18n.js';
+import { startMagic } from './magic.js';
 import { createFader } from './ui/fader.js';
 import { createKnob } from './ui/knob.js';
 import { createMeter } from './ui/meter.js';
@@ -26,7 +27,36 @@ const ui = {
   theme: $('themeBtn'),
   reset: $('resetBtn'),
   notice: $('notice'),
+  stars: document.querySelector('.stars'),
+  starBtns: Array.from(document.querySelectorAll('.star')),
+  viewPanels: Array.from(document.querySelectorAll('[data-view-panel]')),
+  presets: $('presets'),
+  aboutVersion: $('aboutVersion'),
 };
+
+// Presets: cada uno es un parche de settings. Se aplican tal cual con commit().
+const PRESETS = [
+  {
+    id: 'flat',
+    glyph: '平',
+    patch: { volume: 100, muted: false, bypass: false, eq: [0, 0, 0, 0, 0], pitch: 0, pan: 0, reverb: { mix: 0, decay: 2 } },
+  },
+  {
+    id: 'vocal',
+    glyph: '聲',
+    patch: { volume: 110, muted: false, bypass: false, eq: [-2, 0, 3, 2, 0], pitch: 0, pan: 0, reverb: { mix: 10, decay: 1.5 } },
+  },
+  {
+    id: 'cinema',
+    glyph: '影',
+    patch: { volume: 130, muted: false, bypass: false, eq: [3, 0, 0, 1, 3], pitch: 0, pan: 0, reverb: { mix: 25, decay: 3 } },
+  },
+  {
+    id: 'night',
+    glyph: '夜',
+    patch: { volume: 75, muted: false, bypass: false, eq: [2, 1, 0, -2, -3], pitch: 0, pan: 0, reverb: { mix: 5, decay: 2 } },
+  },
+];
 
 // Páginas donde Chrome no deja capturar audio.
 const BLOCKED_URL = /^(chrome|edge|brave|opera|about|devtools|view-source|chrome-extension):|^https:\/\/(chromewebstore\.google\.com|chrome\.google\.com\/webstore)/i;
@@ -165,6 +195,73 @@ function renderToggles() {
   ui.fx.classList.toggle('is-off', settings.bypass);
   ui.eq.classList.toggle('is-off', settings.bypass);
   ui.auto.checked = settings.autoCapture;
+  markActivePreset();
+}
+
+// ── Vistas (3 estrellas) ────────────────────────────────
+function switchView(view) {
+  if (!view || app.dataset.view === view) return;
+  app.dataset.view = view;
+  ui.starBtns.forEach((btn) => {
+    const active = btn.dataset.view === view;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-selected', active);
+  });
+  ui.viewPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.viewPanel !== view;
+  });
+}
+
+// ── Presets ─────────────────────────────────────────────
+function buildPresets() {
+  if (!ui.presets) return;
+  ui.presets.replaceChildren();
+  for (const preset of PRESETS) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'preset';
+    btn.dataset.preset = preset.id;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.innerHTML = `
+      <span class="preset__glyph" aria-hidden="true">${preset.glyph}</span>
+      <span class="preset__name" data-i18n="presets.${preset.id}"></span>
+      <span class="preset__desc" data-i18n="presets.${preset.id}.desc"></span>
+    `;
+    btn.addEventListener('click', () => applyPreset(preset));
+    ui.presets.appendChild(btn);
+  }
+  translateDom(ui.presets);
+  markActivePreset();
+}
+
+function applyPreset(preset) {
+  const patch = structuredClone(preset.patch);
+  commit(patch);
+  syncControls();
+}
+
+function presetMatches(preset) {
+  const p = preset.patch;
+  if (settings.volume !== p.volume) return false;
+  if (settings.muted !== p.muted) return false;
+  if (settings.bypass !== p.bypass) return false;
+  if (settings.pitch !== p.pitch) return false;
+  if (settings.pan !== p.pan) return false;
+  if (settings.reverb.mix !== p.reverb.mix) return false;
+  if (settings.reverb.decay !== p.reverb.decay) return false;
+  for (let i = 0; i < p.eq.length; i++) {
+    if (settings.eq[i] !== p.eq[i]) return false;
+  }
+  return true;
+}
+
+function markActivePreset() {
+  if (!ui.presets) return;
+  const buttons = ui.presets.querySelectorAll('.preset');
+  buttons.forEach((btn) => {
+    const preset = PRESETS.find((p) => p.id === btn.dataset.preset);
+    btn.setAttribute('aria-pressed', preset && presetMatches(preset) ? 'true' : 'false');
+  });
 }
 
 // ── Tema e idioma ──
@@ -311,17 +408,25 @@ ui.reset.addEventListener('click', () => {
   syncControls();
 });
 
+ui.stars?.addEventListener('click', (e) => {
+  const view = e.target.closest('[data-view]')?.dataset.view;
+  if (view) switchView(view);
+});
+
 function hostOf(url) {
   try { return new URL(url).hostname || url; } catch { return '—'; }
 }
 
 async function init() {
   addScrews(document.querySelectorAll('[data-rack]'));
+  startMagic(document.getElementById('magicCanvas'));
   settings = await loadSettings();
   applyLang();
   rememberUiPrefs();
   buildControls();
+  buildPresets();
   renderToggles();
+  if (ui.aboutVersion) ui.aboutVersion.textContent = chrome.runtime.getManifest().version;
 
   [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   ui.host.textContent = hostOf(tab?.url);

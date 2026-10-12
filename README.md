@@ -44,4 +44,8 @@ src/
 docs/              arquitectura
 ```
 
-Más detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Más detalle en:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — resumen de arquitectura.
+- [docs/MANUAL-COMPLETO.md](docs/MANUAL-COMPLETO.md) — referencia end-to-end
+  (archivos, mensajes, efectos, UI, temas, i18n, presets, extensión).

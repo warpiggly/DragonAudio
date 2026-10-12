@@ -16,9 +16,33 @@
     </defs>
   </svg>
 
-  <main class="app" id="app" data-capture="idle">
+  <!-- Fondo general difuminado: dragón sobre montañas brumosas, con una capa
+       de partículas mágicas (chispas que suben + pétalos que caen) encima. -->
+  <div class="scenery" aria-hidden="true">
+    <div class="scenery__img"></div>
+    <div class="scenery__veil"></div>
+    <canvas class="scenery__magic" id="magicCanvas"></canvas>
+  </div>
+
+  <main class="app" id="app" data-capture="idle" data-view="mixer">
+
+    <!-- Navegación de 3 estrellas (Mixer / Presets / Acerca). La imagen se
+         pinta por CSS como background para poder cambiarla al vuelo según el
+         tema (crema sobre oscuro, negra sobre claro). -->
+    <nav class="stars" role="tablist" data-i18n-aria="stars.aria">
+      <button class="star is-active" type="button" role="tab" data-view="mixer"
+              aria-selected="true" aria-label="Mixer" data-i18n-title="stars.mixer"></button>
+      <button class="star" type="button" role="tab" data-view="presets"
+              aria-selected="false" aria-label="Presets" data-i18n-title="stars.presets"></button>
+      <button class="star" type="button" role="tab" data-view="about"
+              aria-selected="false" aria-label="About" data-i18n-title="stars.about"></button>
+    </nav>
+
+    <!-- Marca: logo memphis + título + botón de encendido. Dos variantes del
+         logo: dorada para tema oscuro, negra para tema claro. CSS decide. -->
     <header class="brand">
-      <img class="brand__logo" src="../../assets/img/logo.png" alt="">
+      <img class="brand__logo brand__logo--dark" src="../../assets/img/Emblema_dorado_del_drag%C3%B3n_serpentino-removebg-preview.png" alt="">
+      <img class="brand__logo brand__logo--light" src="../../assets/img/Logo%20%2C%20Corporate%20negro.png" alt="">
       <div class="brand__text">
         <h1 class="brand__title">Dragon Audio</h1>
         <span class="brand__sub">龙 之 音</span>
@@ -34,57 +58,99 @@
       <span class="tabline__state" id="tabState" data-i18n="capture.idle"></span>
     </div>
 
-    <section class="card hero" data-rack data-i18n-aria="volume.aria">
-      <span class="hero__watermark" aria-hidden="true">龙</span>
-      <button class="chip chip--mute" id="muteBtn" type="button" aria-pressed="false" data-i18n="volume.mute"></button>
-      <div class="hero__knob" id="volumeKnob"></div>
-      <button class="chip" id="unityBtn" type="button" data-i18n-title="volume.unity">100</button>
-      <div class="hero__meter" id="meter"></div>
-    </section>
+    <!-- ========== VISTA 1 · MIXER ========== -->
+    <!-- Volumen + EQ + FX + preferencias. Es el núcleo de la app. -->
+    <div class="view view--mixer" data-view-panel="mixer" role="tabpanel">
 
-    <section class="card" data-rack aria-labelledby="eqTitle">
-      <header class="card__head">
-        <h2 id="eqTitle" data-i18n="eq.title"></h2>
-        <button class="icon-btn" id="eqReset" type="button" data-i18n-title="eq.reset">↺</button>
-      </header>
-      <div class="eq" id="eq"></div>
-    </section>
+      <section class="card hero" data-rack data-i18n-aria="volume.aria">
+        <span class="hero__watermark" aria-hidden="true">龙</span>
+        <button class="chip chip--mute" id="muteBtn" type="button" aria-pressed="false" data-i18n="volume.mute"></button>
+        <div class="hero__knob" id="volumeKnob"></div>
+        <button class="chip" id="unityBtn" type="button" data-i18n-title="volume.unity">100</button>
+        <div class="hero__meter" id="meter"></div>
+      </section>
 
-    <section class="card" data-rack aria-labelledby="fxTitle">
-      <header class="card__head">
-        <h2 id="fxTitle" data-i18n="fx.title"></h2>
-        <button class="chip chip--led" id="bypassBtn" type="button" aria-pressed="true" data-i18n-title="fx.bypass">
-          <span class="led" aria-hidden="true"></span>FX
-        </button>
-      </header>
-      <div class="fx" id="fx"></div>
-    </section>
+      <section class="card" data-rack aria-labelledby="eqTitle">
+        <header class="card__head">
+          <h2 id="eqTitle" data-i18n="eq.title"></h2>
+          <button class="icon-btn" id="eqReset" type="button" data-i18n-title="eq.reset">↺</button>
+        </header>
+        <div class="eq" id="eq"></div>
+      </section>
 
-    <footer class="foot">
-      <label class="switch" data-i18n-title="foot.autoHint">
-        <input type="checkbox" id="autoCapture">
-        <span class="switch__track" aria-hidden="true"></span>
-        <span data-i18n="foot.auto"></span>
-      </label>
+      <section class="card" data-rack aria-labelledby="fxTitle">
+        <header class="card__head">
+          <h2 id="fxTitle" data-i18n="fx.title"></h2>
+          <button class="chip chip--led" id="bypassBtn" type="button" aria-pressed="true" data-i18n-title="fx.bypass">
+            <span class="led" aria-hidden="true"></span>FX
+          </button>
+        </header>
+        <div class="fx" id="fx"></div>
+      </section>
 
-      <div class="foot__prefs">
-        <div class="seg" role="radiogroup" id="langSeg" data-i18n-aria="foot.lang">
-          <button type="button" role="radio" data-lang="en">EN</button>
-          <button type="button" role="radio" data-lang="es">ES</button>
+      <footer class="foot">
+        <label class="switch" data-i18n-title="foot.autoHint">
+          <input type="checkbox" id="autoCapture">
+          <span class="switch__track" aria-hidden="true"></span>
+          <span data-i18n="foot.auto"></span>
+        </label>
+
+        <div class="foot__prefs">
+          <div class="seg" role="radiogroup" id="langSeg" data-i18n-aria="foot.lang">
+            <button type="button" role="radio" data-lang="en">EN</button>
+            <button type="button" role="radio" data-lang="es">ES</button>
+          </div>
+          <button class="theme-btn" id="themeBtn" type="button">
+            <svg class="theme-btn__sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.2"/>
+              <path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/>
+            </svg>
+            <svg class="theme-btn__moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>
+            </svg>
+          </button>
         </div>
-        <button class="theme-btn" id="themeBtn" type="button">
-          <svg class="theme-btn__sun" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2"/>
-            <path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/>
-          </svg>
-          <svg class="theme-btn__moon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>
-          </svg>
-        </button>
-      </div>
 
-      <button class="text-btn" id="resetBtn" type="button" data-i18n="foot.reset"></button>
-    </footer>
+        <button class="text-btn" id="resetBtn" type="button" data-i18n="foot.reset"></button>
+      </footer>
+    </div>
+
+    <!-- ========== VISTA 2 · PRESETS ========== -->
+    <!-- Ajustes rápidos: cada tarjeta aplica un conjunto de valores al motor. -->
+    <div class="view view--presets" data-view-panel="presets" role="tabpanel" hidden>
+      <section class="card" data-rack>
+        <header class="card__head">
+          <h2 data-i18n="presets.title"></h2>
+          <span class="card__hint" data-i18n="presets.hint"></span>
+        </header>
+        <div class="presets" id="presets"></div>
+      </section>
+    </div>
+
+    <!-- ========== VISTA 3 · ACERCA DE ========== -->
+    <!-- Logo grande, descripción y créditos. Cambia de idioma con el footer. -->
+    <div class="view view--about" data-view-panel="about" role="tabpanel" hidden>
+      <section class="card card--about" data-rack>
+        <img class="about__logo about__logo--dark" src="../../assets/img/Emblema_dorado_del_drag%C3%B3n_serpentino-removebg-preview.png" alt="">
+        <img class="about__logo about__logo--light" src="../../assets/img/Logo%20%2C%20Corporate%20negro.png" alt="">
+        <h2 class="about__title">Dragon Audio</h2>
+        <p class="about__sub">龙 之 音</p>
+        <p class="about__desc" data-i18n="about.desc"></p>
+
+        <div class="about__meta">
+          <span class="about__meta-row">
+            <span class="about__meta-key" data-i18n="about.version"></span>
+            <span class="about__meta-val" id="aboutVersion">—</span>
+          </span>
+          <span class="about__meta-row">
+            <span class="about__meta-key" data-i18n="about.shortcut"></span>
+            <span class="about__meta-val about__meta-val--mono">Alt + Shift + D</span>
+          </span>
+        </div>
+
+        <p class="about__credit" data-i18n="about.credit"></p>
+      </section>
+    </div>
 
     <div class="notice" id="notice" role="status" hidden></div>
   </main>
